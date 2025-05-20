@@ -13,23 +13,22 @@ interface Theme {
 }
 
 interface ChatbotProps {
-  initialMessage?: string;
   theme?: Partial<Theme>;
 }
 
 const defaultTheme: Theme = {
-  primary: '#3B82F6', // blue-500
+  primary: '#007AFF', // Framer blue
   background: '#FFFFFF',
   text: '#000000'
 };
 
-export const Chatbot: React.FC<ChatbotProps> = ({ 
-  initialMessage = "Hello! How can I help you?",
+export const Chatbot: React.FC<ChatbotProps> = ({
   theme = {}
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: initialMessage }
+    // Candy's initial intro message
+    { role: 'assistant', content: "Hey there! I'm Candy, CNDY's studio helper 🍬. Ready to make your project pop? Let's get started! What's your name?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -50,21 +49,27 @@ export const Chatbot: React.FC<ChatbotProps> = ({
     if (!input.trim()) return;
 
     const userMessage: Message = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    // Add user message to state immediately
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput('');
     setIsLoading(true);
 
     try {
+      // Send the entire message history to the backend
       const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ messages: newMessages }),
       });
 
       const data = await response.json();
+      // Add assistant's response to state
       setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
     } catch (error) {
       console.error('Error:', error);
+      // Add an error message if something goes wrong
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Oops! Something went wrong. Please try again.' }]);
     } finally {
       setIsLoading(false);
     }

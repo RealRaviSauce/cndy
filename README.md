@@ -1,6 +1,6 @@
-# Custom Chatbot Component
+# Cndy Chatbot
 
-A customizable chatbot component that can be embedded in Framer websites and uses a custom OpenAI assistant.
+A customizable chatbot component that can be easily embedded in Framer websites and uses a custom OpenAI assistant.
 
 ## Setup
 
@@ -26,20 +26,27 @@ npm run dev
 npm run build
 ```
 
-2. In your Framer project, add a custom code component and import the Chatbot:
-```tsx
-import { Chatbot } from './path/to/Chatbot';
+2. In your Framer project:
+   - Add a new "Code" component
+   - Copy the contents of `dist/cndy-chatbot.es.js`
+   - Paste it into the Code component
+   - The chatbot will automatically appear in your Framer project
 
-export default function CustomCode() {
-  return <Chatbot />;
-}
-```
-
-## Customization
-
-- Modify the system prompt in `src/api/chat.ts` to match your custom assistant's instructions
-- Adjust the styling in `src/components/Chatbot.tsx` to match your website's theme
-- Update the model in `src/api/chat.ts` to use your custom assistant's model
+3. To customize the chatbot in Framer:
+   - Add props to the CustomCode component:
+   ```tsx
+   export default function CustomCode() {
+     return <Chatbot 
+       // Optional props
+       initialMessage="Hello! How can I help you?"
+       theme={{
+         primary: "#007AFF",
+         background: "#FFFFFF",
+         text: "#000000"
+       }}
+     />;
+   }
+   ```
 
 ## Features
 
@@ -48,4 +55,13 @@ export default function CustomCode() {
 - Loading states
 - Auto-scrolling messages
 - TypeScript support
-- Tailwind CSS styling 
+- Tailwind CSS styling
+- Easy Framer integration
+- Customizable theme
+- Environment variable support
+
+## Development
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build 

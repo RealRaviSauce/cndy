@@ -6,12 +6,36 @@ interface Message {
   content: string;
 }
 
-export const Chatbot: React.FC = () => {
+interface Theme {
+  primary: string;
+  background: string;
+  text: string;
+}
+
+interface ChatbotProps {
+  initialMessage?: string;
+  theme?: Partial<Theme>;
+}
+
+const defaultTheme: Theme = {
+  primary: '#3B82F6', // blue-500
+  background: '#FFFFFF',
+  text: '#000000'
+};
+
+export const Chatbot: React.FC<ChatbotProps> = ({ 
+  initialMessage = "Hello! How can I help you?",
+  theme = {}
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'assistant', content: initialMessage }
+  ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const finalTheme = { ...defaultTheme, ...theme };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,7 +55,7 @@ export const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input }),
@@ -54,10 +78,11 @@ export const Chatbot: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-white rounded-lg shadow-xl w-96 h-[500px] flex flex-col"
+            className="rounded-lg shadow-xl w-96 h-[500px] flex flex-col"
+            style={{ backgroundColor: finalTheme.background }}
           >
             <div className="p-4 border-b flex justify-between items-center">
-              <h3 className="font-semibold">Chat Assistant</h3>
+              <h3 className="font-semibold" style={{ color: finalTheme.text }}>Chat Assistant</h3>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -77,9 +102,12 @@ export const Chatbot: React.FC = () => {
                   <div
                     className={`max-w-[80%] rounded-lg p-3 ${
                       message.role === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-800'
+                        ? 'text-white'
+                        : 'text-gray-800'
                     }`}
+                    style={{
+                      backgroundColor: message.role === 'user' ? finalTheme.primary : '#F3F4F6'
+                    }}
                   >
                     {message.content}
                   </div>
@@ -106,12 +134,18 @@ export const Chatbot: React.FC = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Type your message..."
-                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2"
+                  style={{ 
+                    color: finalTheme.text,
+                    borderColor: finalTheme.primary,
+                    '--tw-ring-color': finalTheme.primary
+                  } as any}
                 />
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                  className="text-white px-4 py-2 rounded-lg disabled:opacity-50"
+                  style={{ backgroundColor: finalTheme.primary }}
                 >
                   Send
                 </button>
@@ -126,7 +160,8 @@ export const Chatbot: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className="bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600"
+          className="text-white p-4 rounded-full shadow-lg"
+          style={{ backgroundColor: finalTheme.primary }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
